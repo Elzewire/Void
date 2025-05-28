@@ -1,0 +1,88 @@
+# Unreal Engine project-specific ignores
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+*.xcodeproj
+*.xcworkspace
+*.xcuserdata/
+*.xcuserstate
+.vscode/
+.idea/
+.vs/
+*.code-workspace
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+
+# Compiled binaries
+*.exe
+*.dll
+*.lib
+*.app
+*.dylib
+*.so
+*.a
+*.pdb
+
+# Unreal auto-generated files
+*.generated.*
+*.generated.cpp
+*.generated.h
+*.target.cs
+*.Build.cs
+*.module.cs
+*.version
+*.Target.cs
+
+# UE-specific folders
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+DerivedDataCache/
+.vscode/
+.vs/
+*.log
+*.tmp
+*.bak
+*.dmp
+
+# World Partition (UE5)
+ExternalActors/
+ExternalObjects/
+
+# Shaders
+Shaders/WorkingDirectory/
+*.ushaderprecache
+*.shadercache
+*.shadercachebackup
+
+# Plugins (optional)
+Plugins/*/Binaries/
+Plugins/*/Intermediate/
+Plugins/*/Saved/
+
+# Packaging output (optional)
+Build/Windows*/x64/
+Build/Linux*/x86_64/
+Saved/StagedBuilds/
+
+# Project files
+*.uprojectdirs
+*.uproject*
+
+# Rider
+.idea/
+*.iml
+out/
+
+# CMake (if used)
+CMakeFiles/
+CMakeCache.txt
