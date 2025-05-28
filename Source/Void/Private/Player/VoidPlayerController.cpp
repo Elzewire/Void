@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 
-#include "Player/VoidPlayerController.h"
+#include "VoidPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 
 void AVoidPlayerController::BeginPlay()

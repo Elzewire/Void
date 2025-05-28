@@ -27,13 +27,8 @@ AVoidProjectile::AVoidProjectile()
 	ProjectileMovement->bRotationFollowsVelocity = true;
 	ProjectileMovement->bShouldBounce = true;
 
-	// Die after 10 seconds by default
-	InitialLifeSpan = 10.0f;
-}
-
-void AVoidProjectile::SetTimeDilation(float NewTimeDilation)
-{
-	this->CustomTimeDilation = NewTimeDilation;
+	// Die after 3 seconds by default
+	InitialLifeSpan = 3.0f;
 }
 
 void AVoidProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)

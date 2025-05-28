@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "DilatableInterface.h"
 #include "GameFramework/Actor.h"
 #include "VoidProjectile.generated.h"
 
@@ -11,7 +10,7 @@ class USphereComponent;
 class UProjectileMovementComponent;
 
 UCLASS(config=Game)
-class AVoidProjectile : public AActor, public IDilatableInterface
+class AVoidProjectile : public AActor
 {
 	GENERATED_BODY()
 
@@ -25,8 +24,6 @@ class AVoidProjectile : public AActor, public IDilatableInterface
 
 public:
 	AVoidProjectile();
-
-	virtual void SetTimeDilation(float NewTimeDilation) override;
 
 	/** called when projectile hits something */
 	UFUNCTION()

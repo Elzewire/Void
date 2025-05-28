@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "DilatableInterface.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "VoidCharacter.generated.h"
@@ -18,7 +17,7 @@ struct FInputActionValue;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
-class AVoidCharacter : public ACharacter, public IDilatableInterface
+class AVoidCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -44,8 +43,6 @@ class AVoidCharacter : public ACharacter, public IDilatableInterface
 	
 public:
 	AVoidCharacter();
-
-	virtual void SetTimeDilation(float NewTimeDilation) override;
 
 protected:
 	virtual void BeginPlay();

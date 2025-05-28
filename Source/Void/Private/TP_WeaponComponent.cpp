@@ -2,7 +2,7 @@
 
 
 #include "TP_WeaponComponent.h"
-#include "Player/VoidCharacter.h"
+#include "VoidCharacter.h"
 #include "VoidProjectile.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"

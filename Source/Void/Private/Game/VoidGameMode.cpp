@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "Game/VoidGameMode.h"
-#include "Player/VoidCharacter.h"
+#include "VoidGameMode.h"
+#include "VoidCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
 AVoidGameMode::AVoidGameMode()
