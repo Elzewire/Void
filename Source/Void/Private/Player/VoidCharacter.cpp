@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "VoidCharacter.h"
+#include "Player/VoidCharacter.h"
 #include "VoidProjectile.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
@@ -39,6 +39,11 @@ AVoidCharacter::AVoidCharacter()
 	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
+}
+
+void AVoidCharacter::SetTimeDilation(float NewTimeDilation)
+{
+	this->CustomTimeDilation = NewTimeDilation;
 }
 
 void AVoidCharacter::BeginPlay()

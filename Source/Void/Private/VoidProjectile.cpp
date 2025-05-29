@@ -31,6 +31,11 @@ AVoidProjectile::AVoidProjectile()
 	InitialLifeSpan = 3.0f;
 }
 
+void AVoidProjectile::SetTimeDilation(float NewTimeDilation)
+{
+	this->CustomTimeDilation = NewTimeDilation;
+}
+
 void AVoidProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	// Only add impulse and destroy projectile if we hit a physics
