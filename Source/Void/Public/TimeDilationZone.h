@@ -18,9 +18,9 @@ public:
 protected:
 	/** Dilation parameters */
 	UPROPERTY(BlueprintReadWrite, Category = TimeDilationZone)
-	float MaxDilation = 0.2f;
+	float MaxDilation = 2.0f;
 	UPROPERTY(BlueprintReadWrite, Category = TimeDilationZone)
-	float MinDilation = 2.0f;
+	float MinDilation = 0.2f;
 	UPROPERTY(BlueprintReadWrite, Category = TimeDilationZone)
 	float MaxRadius = 2000.0f;
 
