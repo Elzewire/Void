@@ -5,13 +5,13 @@
 #include "CoreMinimal.h"
 #include "DilatableInterface.h"
 #include "GameFramework/Actor.h"
-#include "VoidProjectile.generated.h"
+#include "VoidProjectileBase.generated.h"
 
 class USphereComponent;
 class UProjectileMovementComponent;
 
 UCLASS(config=Game)
-class AVoidProjectile : public AActor, public IDilatableInterface
+class AVoidProjectileBase : public AActor, public IDilatableInterface
 {
 	GENERATED_BODY()
 
@@ -24,7 +24,7 @@ class AVoidProjectile : public AActor, public IDilatableInterface
 	UProjectileMovementComponent* ProjectileMovement;
 
 public:
-	AVoidProjectile();
+	AVoidProjectileBase();
 
 	virtual void SetTimeDilation(float NewTimeDilation) override;
 

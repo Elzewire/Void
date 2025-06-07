@@ -4,20 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "TP_WeaponComponent.generated.h"
+#include "WeaponComponent.generated.h"
 
 class AVoidCharacter;
 
-UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class VOID_API UTP_WeaponComponent : public USkeletalMeshComponent
+UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+class VOID_API UWeaponComponent : public UChildActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	/** Projectile class to spawn */
-	UPROPERTY(EditDefaultsOnly, Category=Projectile)
-	TSubclassOf<class AVoidProjectile> ProjectileClass;
-
 	/** Sound to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
 	USoundBase* FireSound;
@@ -39,7 +35,7 @@ public:
 	class UInputAction* FireAction;
 
 	/** Sets default values for this component's properties */
-	UTP_WeaponComponent();
+	UWeaponComponent();
 
 	/** Attaches the actor to a FirstPersonCharacter */
 	UFUNCTION(BlueprintCallable, Category="Weapon")
@@ -47,7 +43,7 @@ public:
 
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Weapon")
-	void Fire();
+	void Shoot();
 
 protected:
 	/** Ends gameplay for this component. */
