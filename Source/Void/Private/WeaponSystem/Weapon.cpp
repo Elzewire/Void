@@ -64,52 +64,52 @@ void AWeapon::OnConstruction(const FTransform& Transform)
 	ShootingStrategy = NewObject<UWeaponShootingStrategy>(this, WeaponCoreData->ShootingStrategyClass);
 	
 	// Reassemble modules
-	AttachModulesRecursive(WeaponCoreData, EquippedModules, WeaponCoreMesh);
+	AttachModulesRecursive(WeaponCoreData, EquippedModuleAttachments, WeaponCoreMesh);
 }
 
-void AWeapon::AttachModulesRecursive(UWeaponPartData* ParentPartData, const TArray<FEquippedModuleData>& ModulesToAttach, USceneComponent* AttachToComponent)
+void AWeapon::AttachModulesRecursive(UWeaponPartData* ParentPartData, const TArray<UWeaponModuleAttachment*>& Attachments, USceneComponent* AttachToComponent)
 {
 	if (!ParentPartData || !AttachToComponent) return;
 
-	for (const FEquippedModuleData& EquippedModule: ModulesToAttach)
+	for (UWeaponModuleAttachment* ModuleAttachment: Attachments)
 	{
-		if (!EquippedModule.ModuleDataAsset)
+		if (!ModuleAttachment || !ModuleAttachment->ModuleData)
 		{
 			UE_LOG(LogBlueprint, Warning, TEXT("Module data asset not specified. Module will not be attached"))
 			continue;
 		}
 
-		const FModuleSocket* ModuleSocket = ParentPartData->ModuleSockets.Find(EquippedModule.AttachToSocket);
+		const FModuleSocket* ModuleSocket = ParentPartData->ModuleSockets.Find(ModuleAttachment->AttachToSocket);
 
 		bool bIsModuleAllowed = false;
 		if (ModuleSocket)
 		{
-			bIsModuleAllowed = EquippedModule.ModuleDataAsset->GetClass()->IsChildOf(ModuleSocket->AllowedModules); 
+			bIsModuleAllowed = ModuleAttachment->ModuleData->GetClass()->IsChildOf(ModuleSocket->AllowedModules); 
 		}
 		else
 		{
 			UE_LOG(LogBlueprint, Warning, TEXT("Socket '%s' not found on parent part '%s'. Module will not be attached."),
-				*EquippedModule.AttachToSocket.ToString(), *ParentPartData->GetName());
+				*ModuleAttachment->AttachToSocket.ToString(), *ParentPartData->GetName());
 			continue;
 		}
 
 		if (!bIsModuleAllowed)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Module '%s' is not allowed on socket '%s' of parent part '%s'. Skipping."),
-				*EquippedModule.ModuleDataAsset->GetName(), *EquippedModule.AttachToSocket.ToString(), *ParentPartData->GetName());
+				*ModuleAttachment->ModuleData->GetName(), *ModuleAttachment->AttachToSocket.ToString(), *ParentPartData->GetName());
 			continue;
 		}
 
 		// Generate static mesh component for this module
 		UStaticMeshComponent* ModuleMeshComponent = NewObject<UStaticMeshComponent>(this, NAME_None, RF_Transient);
-		ModuleMeshComponent->SetStaticMesh(EquippedModule.ModuleDataAsset->ModuleMesh);
-		ModuleMeshComponent->AttachToComponent(AttachToComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale, EquippedModule.AttachToSocket);
+		ModuleMeshComponent->SetStaticMesh(ModuleAttachment->ModuleData->ModuleMesh);
+		ModuleMeshComponent->AttachToComponent(AttachToComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale, ModuleAttachment->AttachToSocket);
 		ModuleMeshComponent->RegisterComponent();
 		ModuleMeshes.Add(ModuleMeshComponent);
 		
-		if (EquippedModule.ChildModules.Num() > 0)
+		if (ModuleAttachment->ChildAttachments.Num() > 0)
 		{
-			AttachModulesRecursive(EquippedModule.ModuleDataAsset, EquippedModule.ChildModules, ModuleMeshComponent);
+			AttachModulesRecursive(ModuleAttachment->ModuleData, ModuleAttachment->ChildAttachments, ModuleMeshComponent);
 		}
 	}
 }

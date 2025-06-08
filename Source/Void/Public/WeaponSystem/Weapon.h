@@ -5,26 +5,12 @@
 #include "CoreMinimal.h"
 #include "WeaponShootingStrategy.h"
 #include "GameFramework/Actor.h"
+#include "WeaponSystem/WeaponModuleAttachment.h"
 #include "Weapon.generated.h"
 
 class UWeaponPartData;
 class UWeaponModuleData;
 class UWeaponCoreData;
-
-USTRUCT(BlueprintType)
-struct FEquippedModuleData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly)
-	UWeaponModuleData* ModuleDataAsset;
-
-	UPROPERTY(EditAnywhere)
-	FName AttachToSocket;
-	
-	// TODO : Avoid using recursive structs
-	TArray<FEquippedModuleData> ChildModules;
-};
 
 UCLASS(Blueprintable)
 class VOID_API AWeapon : public AActor
@@ -40,8 +26,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon | Composition")
 	UWeaponCoreData* WeaponCoreData;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon | Composition")
-	TArray<FEquippedModuleData> EquippedModules;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Instanced, Category = "Weapon | Composition")
+	TArray<UWeaponModuleAttachment*> EquippedModuleAttachments;
 	
 	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
@@ -69,5 +55,5 @@ protected:
 	UWeaponShootingStrategy* ShootingStrategy;
 
 	UFUNCTION()
-	void AttachModulesRecursive(UWeaponPartData* ParentPartData, const TArray<FEquippedModuleData>& ModulesToAttach, USceneComponent* AttachToComponent);
+	void AttachModulesRecursive(UWeaponPartData* ParentPartData, const TArray<UWeaponModuleAttachment*>& Attachments, USceneComponent* AttachToComponent);
 };
