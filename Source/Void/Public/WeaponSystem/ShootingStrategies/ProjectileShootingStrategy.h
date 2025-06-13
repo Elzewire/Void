@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class VOID_API UProjectileShootingStrategy : public UWeaponShootingStrategy
 {
 	GENERATED_BODY()

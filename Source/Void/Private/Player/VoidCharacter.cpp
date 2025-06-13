@@ -1,7 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Player/VoidCharacter.h"
-#include "VoidProjectileBase.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -10,6 +9,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Engine/LocalPlayer.h"
+#include "WeaponSystem/WeaponComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -39,6 +39,8 @@ AVoidCharacter::AVoidCharacter()
 	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
+	// Initialize weapon component
+	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
 }
 
 void AVoidCharacter::SetTimeDilation(float NewTimeDilation)
@@ -51,6 +53,8 @@ void AVoidCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
+	WeaponComponent->InitWithPlayer(this);
+	
 	// Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
@@ -120,4 +124,9 @@ void AVoidCharacter::SetHasRifle(bool bNewHasRifle)
 bool AVoidCharacter::GetHasRifle()
 {
 	return bHasRifle;
+}
+
+void AVoidCharacter::AttachWeapon(AWeapon* Weapon)
+{
+	WeaponComponent->AttachWeapon(Weapon);
 }

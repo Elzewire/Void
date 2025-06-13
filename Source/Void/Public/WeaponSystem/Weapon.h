@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "TP_PickUpComponent.h"
 #include "WeaponShootingStrategy.h"
 #include "GameFramework/Actor.h"
 #include "WeaponSystem/WeaponModuleAttachment.h"
@@ -11,6 +12,7 @@
 class UWeaponPartData;
 class UWeaponModuleData;
 class UWeaponCoreData;
+class AVoidCharacter;
 
 UCLASS(Blueprintable)
 class VOID_API AWeapon : public AActor
@@ -21,6 +23,9 @@ public:
 	// Sets default values for this actor's properties
 	AWeapon();
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	UTP_PickUpComponent* PickUpComponent;
+	
 	// ~~~ Weapon specific stats ~~~
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon | Composition")
@@ -56,4 +61,10 @@ protected:
 
 	UFUNCTION()
 	void AttachModulesRecursive(UWeaponPartData* ParentPartData, const TArray<UWeaponModuleAttachment*>& Attachments, USceneComponent* AttachToComponent);
+
+	UFUNCTION()
+	void AttachToPlayer(AVoidCharacter* Player);
+
+	UFUNCTION()
+	void ConstructWeapon();
 };

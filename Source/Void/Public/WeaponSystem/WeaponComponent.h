@@ -3,13 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/SkeletalMeshComponent.h"
+#include "Weapon.h"
 #include "WeaponComponent.generated.h"
 
-class AVoidCharacter;
-
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class VOID_API UWeaponComponent : public UChildActorComponent
+class VOID_API UWeaponComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -34,23 +32,31 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* FireAction;
 
+	/** Socket on player mesh to attach to */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
+	FName WeaponSocket;
+	
 	/** Sets default values for this component's properties */
 	UWeaponComponent();
-
-	/** Attaches the actor to a FirstPersonCharacter */
+	
 	UFUNCTION(BlueprintCallable, Category="Weapon")
-	void AttachWeapon(AVoidCharacter* TargetCharacter);
+	void AttachWeapon(AWeapon* Weapon);
+
+	UFUNCTION(BlueprintCallable, Category="Weapon")
+	AWeapon* GetWeapon();
 
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void Shoot();
 
-protected:
-	/** Ends gameplay for this component. */
-	UFUNCTION()
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	UFUNCTION(BlueprintCallable, Category="Weapon Component")
+	void InitWithPlayer(AVoidCharacter* OwningPlayer);
 
-private:
-	/** The Character holding this weapon*/
-	AVoidCharacter* Character;
+protected:
+	// TODO : Change to array or map of weapons, to hold multiple
+	UPROPERTY(BlueprintReadOnly, Category = "Weapon")
+	AWeapon* Weapon;
+
+	UPROPERTY(BlueprintReadOnly)
+	AVoidCharacter* Player;
 };

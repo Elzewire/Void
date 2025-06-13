@@ -8,8 +8,10 @@
 #include "Logging/LogMacros.h"
 #include "VoidCharacter.generated.h"
 
+class AWeapon;
 class UInputComponent;
 class USkeletalMeshComponent;
+class UWeaponComponent;
 class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
@@ -26,6 +28,10 @@ class AVoidCharacter : public ACharacter, public IDilatableInterface
 	UPROPERTY(VisibleDefaultsOnly, Category=Mesh)
 	USkeletalMeshComponent* Mesh1P;
 
+	/** Weapon logic */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	UWeaponComponent* WeaponComponent;
+	
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FirstPersonCameraComponent;
@@ -41,7 +47,7 @@ class AVoidCharacter : public ACharacter, public IDilatableInterface
 	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* MoveAction;
-	
+
 public:
 	AVoidCharacter();
 
@@ -68,6 +74,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 	bool GetHasRifle();
 
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void AttachWeapon(AWeapon* Weapon);
+	
 protected:
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
@@ -83,6 +92,7 @@ protected:
 public:
 	/** Returns Mesh1P subobject **/
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
+	
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 

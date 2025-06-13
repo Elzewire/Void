@@ -34,7 +34,7 @@ void ATimeDilationZone::Tick(float DeltaTime)
 
 void ATimeDilationZone::UpdateTimeDilation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Updating TD"))
+	//UE_LOG(LogTemp, Warning, TEXT("Updating TD"))
 	AActor* Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	if (!Player) return;
 

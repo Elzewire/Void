@@ -2,11 +2,6 @@
 
 
 #include "WeaponSystem/WeaponComponent.h"
-#include "Player/VoidCharacter.h"
-#include "VoidProjectileBase.h"
-#include "GameFramework/PlayerController.h"
-#include "Camera/PlayerCameraManager.h"
-#include "Kismet/GameplayStatics.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "WeaponSystem/Weapon.h"
@@ -14,36 +9,23 @@
 // Sets default values for this component's properties
 UWeaponComponent::UWeaponComponent()
 {
-	// Default offset from the character location for projectiles to spawn
-	MuzzleOffset = FVector(100.0f, 0.0f, 10.0f);
-}
-
-
-void UWeaponComponent::Shoot()
-{
-	AWeapon* Weapon = Cast<AWeapon>(GetChildActor());
-	if (Weapon) Weapon->Shoot();
-}
-
-void UWeaponComponent::AttachWeapon(AVoidCharacter* TargetCharacter)
-{
-	Character = TargetCharacter;
-
-	// Check that the character is valid, and has no rifle yet
-	if (Character == nullptr || Character->GetHasRifle())
-	{
-		return;
-	}
-
-	// Attach the weapon to the First Person Character
-	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
 	
-	// switch bHasRifle so the animation blueprint can switch to another animation set
-	Character->SetHasRifle(true);
+}
 
+void UWeaponComponent::AttachWeapon(AWeapon* NewWeapon)
+{
+	if (!Player) return;
+	Weapon = NewWeapon;
+
+	// Attach new weapon to player
+	const FAttachmentTransformRules AttachmentRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true);
+	bool bAttached = Weapon->AttachToComponent(Player->GetMesh1P(), AttachmentRules, WeaponSocket);
+	UE_LOG(LogBlueprint, Warning, TEXT("Attachment succesful:  %hhd"), bAttached)
+	
+	Player->SetHasRifle(true);
+	
 	// Set up action bindings
-	if (APlayerController* PlayerController = Cast<APlayerController>(Character->GetController()))
+	if (APlayerController* PlayerController = Cast<APlayerController>(Player->GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
@@ -59,18 +41,17 @@ void UWeaponComponent::AttachWeapon(AVoidCharacter* TargetCharacter)
 	}
 }
 
-void UWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+AWeapon* UWeaponComponent::GetWeapon()
 {
-	if (Character == nullptr)
-	{
-		return;
-	}
+	return Weapon;
+}
 
-	if (APlayerController* PlayerController = Cast<APlayerController>(Character->GetController()))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			Subsystem->RemoveMappingContext(FireMappingContext);
-		}
-	}
+void UWeaponComponent::Shoot()
+{
+	if (Weapon) Weapon->Shoot();
+}
+
+void UWeaponComponent::InitWithPlayer(AVoidCharacter* OwningPlayer)
+{
+	this->Player = OwningPlayer;
 }

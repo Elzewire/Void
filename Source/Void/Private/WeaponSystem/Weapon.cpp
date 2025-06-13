@@ -3,7 +3,6 @@
 
 #include "WeaponSystem/Weapon.h"
 
-#include "Interfaces/IPluginManager.h"
 #include "WeaponSystem/WeaponCoreData.h"
 #include "WeaponSystem/WeaponModuleData.h"
 
@@ -12,23 +11,33 @@
 AWeapon::AWeapon()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	// Create default components
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	PickUpComponent = CreateDefaultSubobject<UTP_PickUpComponent>("PickupComponent");
+	PickUpComponent->SetupAttachment(RootComponent);
+	PickUpComponent->OnPickUp.AddUniqueDynamic(this, &AWeapon::AttachToPlayer);
 }
 
 // Called when the game starts or when spawned
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+	ConstructWeapon();
 }
 
 void AWeapon::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
+	ConstructWeapon();
+}
 
+void AWeapon::ConstructWeapon()
+{
 	// Destroy previously created mesh components
-	for (auto Mesh : ModuleMeshes)
+	for (UStaticMeshComponent* Mesh : ModuleMeshes)
 	{
-		Mesh->UnregisterComponent();
-		Mesh->DestroyComponent();
+		if (Mesh) Mesh->UnregisterComponent();
 	}
 
 	ModuleMeshes.Empty();
@@ -44,7 +53,6 @@ void AWeapon::OnConstruction(const FTransform& Transform)
 	if (WeaponCoreMesh)
 	{
 		WeaponCoreMesh->UnregisterComponent();
-		WeaponCoreMesh->DestroyComponent();
 	}
 	
 	// Add CoreMesh to the scene
@@ -89,14 +97,14 @@ void AWeapon::AttachModulesRecursive(UWeaponPartData* ParentPartData, const TArr
 		else
 		{
 			UE_LOG(LogBlueprint, Warning, TEXT("Socket '%s' not found on parent part '%s'. Module will not be attached."),
-				*ModuleAttachment->AttachToSocket.ToString(), *ParentPartData->GetName());
+				*ModuleAttachment->AttachToSocket.ToString(), *ParentPartData->GetName())
 			continue;
 		}
 
 		if (!bIsModuleAllowed)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Module '%s' is not allowed on socket '%s' of parent part '%s'. Skipping."),
-				*ModuleAttachment->ModuleData->GetName(), *ModuleAttachment->AttachToSocket.ToString(), *ParentPartData->GetName());
+				*ModuleAttachment->ModuleData->GetName(), *ModuleAttachment->AttachToSocket.ToString(), *ParentPartData->GetName())
 			continue;
 		}
 
@@ -132,3 +140,13 @@ void AWeapon::Reload()
 	
 }
 
+void AWeapon::AttachToPlayer(AVoidCharacter* Player)
+{
+	Player->AttachWeapon(this);
+	if (WeaponCoreMesh) WeaponCoreMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	for (UStaticMeshComponent* Mesh : ModuleMeshes)
+	{
+		if (Mesh) Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	UE_LOG(LogBlueprint, Warning, TEXT("Attached to player"))
+}
