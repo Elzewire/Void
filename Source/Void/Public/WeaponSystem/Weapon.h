@@ -27,13 +27,18 @@ public:
 	UTP_PickUpComponent* PickUpComponent;
 	
 	// ~~~ Weapon specific stats ~~~
+    UPROPERTY(BlueprintReadOnly, Category = "Weapon | Stats")
+	FWeaponStats WeaponStats;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon | Composition")
 	UWeaponCoreData* WeaponCoreData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Instanced, Category = "Weapon | Composition")
 	TArray<UWeaponModuleAttachment*> EquippedModuleAttachments;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon | Composition")
+	FName MuzzleSocketName;
+
 	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 
@@ -41,12 +46,24 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// ~~~ Weapon specific functions ~~~
-
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void Shoot();
-
+	void Shoot(FRotator& ShootDirection);
+	
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void Reload();
+
+	// ~~~ Cosmetic Functions
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void StartShootingEffects();
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void EndShootingEffects();
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void UpdateAimDirection(const FRotator& NewAimDirection);
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	UMeshComponent* GetActiveMuzzleComponent();
 	
 protected:
 
@@ -59,12 +76,21 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	UWeaponShootingStrategy* ShootingStrategy;
 
+	UPROPERTY(BlueprintReadOnly)
+	FRotator AimDirection;
+	
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsShooting;
+	
 	UFUNCTION()
 	void AttachModulesRecursive(UWeaponPartData* ParentPartData, const TArray<UWeaponModuleAttachment*>& Attachments, USceneComponent* AttachToComponent);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void AttachToPlayer(AVoidCharacter* Player);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void ConstructWeapon();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FTransform GetMuzzleTransform();
 };

@@ -16,10 +16,6 @@ class VOID_API UProjectileShootingStrategy : public UWeaponShootingStrategy
 	GENERATED_BODY()
 	
 public:
-
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Projectile Shooting")
-	TSubclassOf<AVoidProjectileBase> ProjectileClass;
-	
 	UFUNCTION(BlueprintCallable, Category = "Projectile Shooting")
-	virtual void Shoot(AWeapon* Weapon, const FVector& MuzzleLocation, const FRotator& MuzzleRotation) override;
+	virtual void Shoot(AWeapon* Weapon, const FVector& MuzzleLocation, const FRotator& ShootDirection) override;
 };

@@ -4,6 +4,7 @@
 #include "WeaponSystem/WeaponComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Camera/CameraComponent.h"
 #include "WeaponSystem/Weapon.h"
 
 // Sets default values for this component's properties
@@ -36,7 +37,9 @@ void UWeaponComponent::AttachWeapon(AWeapon* NewWeapon)
 		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
 		{
 			// Fire
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UWeaponComponent::Shoot);
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &UWeaponComponent::ShootStart);
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Ongoing, this, &UWeaponComponent::UpdateAimDirection);
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &UWeaponComponent::ShootEnd);
 		}
 	}
 }
@@ -46,9 +49,41 @@ AWeapon* UWeaponComponent::GetWeapon()
 	return Weapon;
 }
 
+void UWeaponComponent::ShootStart()
+{
+	if (Weapon)
+	{
+		Weapon->StartShootingEffects();
+
+		// Time since last shot
+		const float Delay = FMath::Clamp(Weapon->WeaponStats.ShootingSpeed - (GetWorld()->GetTimeSeconds() - LastTime), 0.0f, Weapon->WeaponStats.ShootingSpeed);
+
+		GetWorld()->GetTimerManager().SetTimer(ShootingTimer, this, &UWeaponComponent::Shoot, Weapon->WeaponStats.ShootingSpeed, true, Delay);
+	}
+}
+
 void UWeaponComponent::Shoot()
 {
-	if (Weapon) Weapon->Shoot();
+	if (!Player) return;
+	FRotator ShootDirection = Player->GetFirstPersonCameraComponent()->GetComponentRotation();
+	
+	if (Weapon) Weapon->Shoot(ShootDirection);
+	LastTime = GetWorld()->GetTimeSeconds();
+}
+
+void UWeaponComponent::ShootEnd()
+{
+	if (Weapon) Weapon->EndShootingEffects();
+	GetWorld()->GetTimerManager().ClearTimer(ShootingTimer);
+}
+
+void UWeaponComponent::UpdateAimDirection()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ONGOING"))
+	if (!Player) return;
+	const FRotator ShootDirection = Player->GetFirstPersonCameraComponent()->GetComponentRotation();
+	
+	if (Weapon) Weapon->UpdateAimDirection(ShootDirection);
 }
 
 void UWeaponComponent::InitWithPlayer(AVoidCharacter* OwningPlayer)

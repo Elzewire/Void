@@ -70,9 +70,25 @@ void AWeapon::ConstructWeapon()
 
 	// TODO : Consider destroying previous object
 	ShootingStrategy = NewObject<UWeaponShootingStrategy>(this, WeaponCoreData->ShootingStrategyClass);
+	WeaponStats = WeaponCoreData->BaseStats;
 	
 	// Reassemble modules
 	AttachModulesRecursive(WeaponCoreData, EquippedModuleAttachments, WeaponCoreMesh);
+}
+
+FTransform AWeapon::GetMuzzleTransform()
+{
+	FTransform MuzzleTransform;
+	if (WeaponCoreMesh && WeaponCoreMesh->DoesSocketExist(MuzzleSocketName)) MuzzleTransform = WeaponCoreMesh->GetSocketTransform(MuzzleSocketName);
+	for (int i = 0; i < ModuleMeshes.Num(); i++)
+	{
+		if (ModuleMeshes[i] && ModuleMeshes[i]->DoesSocketExist(MuzzleSocketName))
+		{
+			MuzzleTransform =  ModuleMeshes[i]->GetSocketTransform(MuzzleSocketName);
+		}
+	}
+	
+	return MuzzleTransform;
 }
 
 void AWeapon::AttachModulesRecursive(UWeaponPartData* ParentPartData, const TArray<UWeaponModuleAttachment*>& Attachments, USceneComponent* AttachToComponent)
@@ -126,18 +142,55 @@ void AWeapon::AttachModulesRecursive(UWeaponPartData* ParentPartData, const TArr
 void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// Update FX
+	if (bIsShooting)
+	{
+		ShootingStrategy->UpdateShootingEffects(DeltaTime,this, GetMuzzleTransform().GetLocation(), AimDirection);
+	}
 }
 
-void AWeapon::Shoot()
+void AWeapon::Shoot(FRotator& ShootDirection)
 {
 	if (!ShootingStrategy) return;
-	// TODO : Should calculate muzzle location dynamically (using the modules)
-	ShootingStrategy->Shoot(this, GetActorLocation(), GetActorRotation());
+	ShootingStrategy->Shoot(this, GetMuzzleTransform().GetLocation(), ShootDirection);
 }
 
 void AWeapon::Reload()
 {
 	
+}
+
+void AWeapon::StartShootingEffects()
+{
+	bIsShooting = true;
+	ShootingStrategy->SpawnShootingEffects(this);
+}
+
+void AWeapon::EndShootingEffects()
+{
+	bIsShooting = false;
+	ShootingStrategy->DestroyShootingEffects();
+}
+
+void AWeapon::UpdateAimDirection(const FRotator& NewAimDirection)
+{
+	AimDirection = NewAimDirection;
+}
+
+UMeshComponent* AWeapon::GetActiveMuzzleComponent()
+{
+	UMeshComponent* Component = nullptr;
+	if (WeaponCoreMesh && WeaponCoreMesh->DoesSocketExist(MuzzleSocketName)) Component = WeaponCoreMesh;
+	for (int i = 0; i < ModuleMeshes.Num(); i++)
+	{
+		if (ModuleMeshes[i] && ModuleMeshes[i]->DoesSocketExist(MuzzleSocketName))
+		{
+			Component = ModuleMeshes[i];
+		}
+	}
+	
+	return Component;
 }
 
 void AWeapon::AttachToPlayer(AVoidCharacter* Player)

@@ -4,9 +4,11 @@
 #include "WeaponSystem/ShootingStrategies/ProjectileShootingStrategy.h"
 #include "WeaponSystem/Weapon.h"
 
-void UProjectileShootingStrategy::Shoot(AWeapon* Weapon, const FVector& MuzzleLocation, const FRotator& MuzzleRotation)
+void UProjectileShootingStrategy::Shoot(AWeapon* Weapon, const FVector& MuzzleLocation, const FRotator& ShootDirection)
 {
-	if (!ProjectileClass)
+	if (!Weapon) return;
+	
+	if (!Weapon->WeaponStats.ProjectileClass)
 	{
 		UE_LOG(LogBlueprint, Error, TEXT("Projectle class not specified!"));
 		return;
@@ -16,6 +18,6 @@ void UProjectileShootingStrategy::Shoot(AWeapon* Weapon, const FVector& MuzzleLo
 	SpawnParameters.Owner = Weapon;
 	SpawnParameters.Instigator = Weapon->GetInstigator();
 	
-	AVoidProjectileBase* Projectile = GetWorld()->SpawnActor<AVoidProjectileBase>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParameters);
-	// TODO: Here we can add some modifications from weapon
+	AVoidProjectileBase* Projectile = GetWorld()->SpawnActor<AVoidProjectileBase>(Weapon->WeaponStats.ProjectileClass, MuzzleLocation, ShootDirection, SpawnParameters);
+	// TODO: Here we can add some projectile modifications from weapon
 }

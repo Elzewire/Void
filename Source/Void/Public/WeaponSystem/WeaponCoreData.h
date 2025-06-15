@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "WeaponPartData.h"
+#include "WeaponStats.h"
 #include "WeaponCoreData.generated.h"
 
 class UWeaponShootingStrategy;

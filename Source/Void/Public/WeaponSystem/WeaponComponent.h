@@ -44,11 +44,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	AWeapon* GetWeapon();
-
-	/** Make the weapon Fire a Projectile */
+	
+	/** Start shooting (hold) */
 	UFUNCTION(BlueprintCallable, Category="Weapon")
-	void Shoot();
-
+	void ShootStart();
+	
+	/** Stop shooting */
+	UFUNCTION(BlueprintCallable, Category="Weapon")
+	void ShootEnd();
+	
 	UFUNCTION(BlueprintCallable, Category="Weapon Component")
 	void InitWithPlayer(AVoidCharacter* OwningPlayer);
 
@@ -57,6 +61,20 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Weapon")
 	AWeapon* Weapon;
 
+	UPROPERTY()
+	FTimerHandle ShootingTimer;
+	
+	UPROPERTY()
+	float LastTime;
+
+	/** Fire a single shot */
+	UFUNCTION(BlueprintCallable, Category="Weapon")
+	void Shoot();
+
+	/** Update our weapon with player's current aim direction */
+	UFUNCTION(BlueprintCallable, Category="Weapon")
+	void UpdateAimDirection();
+	
 	UPROPERTY(BlueprintReadOnly)
 	AVoidCharacter* Player;
 };
