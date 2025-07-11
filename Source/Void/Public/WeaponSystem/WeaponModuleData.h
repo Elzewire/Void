@@ -6,6 +6,8 @@
 #include "WeaponPartData.h"
 #include "WeaponModuleData.generated.h"
 
+class UWeaponStatModifier;
+
 /**
  * 
  */
@@ -17,4 +19,7 @@ class VOID_API UWeaponModuleData : public UWeaponPartData
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon Module")
 	UStaticMesh* ModuleMesh;
+
+	UPROPERTY(EditAnywhere, Instanced, BlueprintReadWrite, Category = "Modifiers")
+	TArray<UWeaponStatModifier*> Modifiers;
 };

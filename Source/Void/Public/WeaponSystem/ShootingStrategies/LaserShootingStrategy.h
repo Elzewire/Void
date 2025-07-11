@@ -16,17 +16,28 @@ class VOID_API ULaserShootingStrategy : public UWeaponShootingStrategy
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "Laser Shooting")
-	virtual void Shoot(AWeapon* Weapon, const FVector& MuzzleLocation, const FRotator& ShootDirection) override;
-	
-	UFUNCTION(BlueprintCallable, Category = "Laser Shooting")
-	virtual void UpdateShootingEffects(float DeltaTime, AWeapon* Weapon, const FVector& MuzzleLocation, const FRotator& ShootDirection) override;
+	ULaserShootingStrategy();
 
 	UFUNCTION(BlueprintCallable, Category = "Laser Shooting")
-	virtual void SpawnShootingEffects(AWeapon* Weapon) override;
+	virtual void OnFireStart(const FRotator& ShootDirection) override;
 	
 	UFUNCTION(BlueprintCallable, Category = "Laser Shooting")
-	virtual void DestroyShootingEffects() override;
+	virtual void OnFire(const FRotator& ShootDirection) override;
+	
+	UFUNCTION(BlueprintCallable, Category = "Laser Shooting")
+	virtual void OnFireStop(const FRotator& ShootDirection) override;
+	
+	UFUNCTION(BlueprintCallable, Category = "Laser Shooting")
+	virtual void TraceLaser(const FRotator& ShootDirection, TArray<FVector>& HitLocations, TArray<AActor*>& HitActors);
+
+	UFUNCTION(BlueprintCallable, Category = "Laser Shooting|FX")
+	void InitializeFX();
+	
+	UFUNCTION(BlueprintCallable, Category = "Laser Shooting|FX")
+	void UpdateFX(const TArray<FVector>& HitLocations);
+
+	UFUNCTION(BlueprintCallable, Category = "Laser Shooting|FX")
+	void DestroyFX();
 	
 protected:
 	/** Tag name on surfaces, that can reflect laser */
@@ -36,19 +47,22 @@ protected:
 	/** Name of a beam end parameter on laser niagara FX*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Laser Shooting")
 	FName LaserEndParamName;
-	
-	UPROPERTY(BlueprintReadOnly)
-	TArray<AActor*> HitActors;
 
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FVector> HitLocations;
-	
-	UPROPERTY(BlueprintReadOnly)
-	FRotator ShootDir;
+	/** How long will laser live after burst shot in seconds */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Laser Shooting")
+	float ImpulseDuration;
 
+	UPROPERTY()
+	float LastFireTime;
+
+	UPROPERTY()
+	FTimerHandle ImpulseTimer;
+	
 	UPROPERTY()
 	TArray<UNiagaraComponent*> FX;
 	
+	bool bFXInitialized;
 	bool CanReflect(const FHitResult& HitResult) const;
 	FRotator CalcReflectionDir(const FHitResult& HitResult, const FRotator& IncomingDir);
+	void DebugTraceLaser(const TArray<FVector>& HitLocations);
 };

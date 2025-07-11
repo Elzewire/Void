@@ -9,6 +9,8 @@
 #include "WeaponSystem/WeaponModuleAttachment.h"
 #include "Weapon.generated.h"
 
+class UFireMode;
+enum class ETriggerEvent : uint8;
 class UWeaponPartData;
 class UWeaponModuleData;
 class UWeaponCoreData;
@@ -22,51 +24,60 @@ class VOID_API AWeapon : public AActor
 public:
 	// Sets default values for this actor's properties
 	AWeapon();
-
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	UTP_PickUpComponent* PickUpComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Component")
+	USceneComponent* MuzzleComponent;
 	
-	// ~~~ Weapon specific stats ~~~
-    UPROPERTY(BlueprintReadOnly, Category = "Weapon | Stats")
+	// ~~~ BEGIN Weapon specific stats ~~~
+    UPROPERTY(BlueprintReadOnly, Category = "Weapon|Stats")
 	FWeaponStats WeaponStats;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon | Composition")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Composition")
 	UWeaponCoreData* WeaponCoreData;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Instanced, Category = "Weapon | Composition")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Instanced, Category = "Weapon|Composition")
 	TArray<UWeaponModuleAttachment*> EquippedModuleAttachments;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon | Composition")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Composition")
 	FName MuzzleSocketName;
+	// ~~~ END Weapon specific stats ~~~
 
 	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// ~~~ Weapon specific functions ~~~
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void Shoot(FRotator& ShootDirection);
 	
+	// ~~~ BEGIN Weapon specific functions ~~~
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void FireStarted(const FRotator& ShootDirection);
+	
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void Fire(const FRotator& ShootDirection);
+	
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void FireCompleted(const FRotator& ShootDirection);
+
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void Reload();
+	
+	UFUNCTION(BlueprintCallable, Category = "Weapon|Fire Mode")
+	UInputAction* GetFireAction();
 
-	// ~~~ Cosmetic Functions
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void StartShootingEffects();
+	UFUNCTION(BlueprintCallable, Category = "Weapon|Fire Mode")
+	UInputMappingContext* GetFireMappingContext();
 
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void EndShootingEffects();
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FTransform GetMuzzleTransform();
 
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void UpdateAimDirection(const FRotator& NewAimDirection);
-
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	UMeshComponent* GetActiveMuzzleComponent();
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	USceneComponent* GetMuzzleComponent();
+	// ~~~ END Weapon specific functions ~~~
 	
 protected:
-
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Components")
 	USkeletalMeshComponent* WeaponCoreMesh;
 	
@@ -76,6 +87,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	UWeaponShootingStrategy* ShootingStrategy;
 
+	UPROPERTY(BlueprintReadOnly)
+	UFireMode* FireMode;
+	
 	UPROPERTY(BlueprintReadOnly)
 	FRotator AimDirection;
 	
@@ -90,7 +104,4 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void ConstructWeapon();
-
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FTransform GetMuzzleTransform();
 };

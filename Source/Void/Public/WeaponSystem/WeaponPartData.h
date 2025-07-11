@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "WeaponStats.h"
 #include "Engine/DataAsset.h"
 #include "WeaponPartData.generated.h"
 
@@ -11,6 +10,7 @@
  * 
  */
 
+struct FWeaponStatModifier;
 class UWeaponModuleData;
 
 USTRUCT(BlueprintType)
@@ -33,7 +33,4 @@ class VOID_API UWeaponPartData : public UDataAsset
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon Part")
 	TMap<FName, FModuleSocket> ModuleSockets;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Part")
-	FWeaponStats BaseStats;
 };

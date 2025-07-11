@@ -3,50 +3,41 @@
 #include "WeaponStats.generated.h"
 
 class UNiagaraSystem;
+class UInputMappingContext;
+class UInputAction;
 class AVoidProjectileBase;
 
 UENUM(BlueprintType)
-enum class EDamageType : uint8
+enum EDamageType : uint8
 {
-	KINETIC = 0 UMETA(DisplayName = "Kinetic"),
-	ENERGETIC = 1 UMETA(DisplayName = "Energetic"),
-	SPECIAL = 2 UMETA(DisplayName = "Special")
+	DT_KINETIC = 0 UMETA(DisplayName = "Kinetic"),
+	DT_ENERGETIC = 1 UMETA(DisplayName = "Energetic"),
+	DT_SPECIAL = 2 UMETA(DisplayName = "Special"),
+	DT_EMOTIONAL = 3 UMETA(DisplayName = "Special")
 };
 
 UENUM(BlueprintType)
-enum class EWeaponSize : uint8
+enum EWeaponSize : uint8
 {
-	LIGHT = 0 UMETA(DisplayName = "Light"), // Size <= 10
-	MEDIUM = 1 UMETA(DisplayName = "Medium"), // Size <= 20
-	HEAVY = 2 UMETA(DisplayName = "Heavy") // Size > 20
-};
-
-UENUM(BlueprintType)
-enum class EShootingType : uint8
-{
-	SINGLE = 0 UMETA(DisplayName = "Single"), // Shoot after every click
-	HOLD_FIRE = 1 UMETA(DisplayName = "Hold To Fire"), // Single + holding to fire automatically
-	HOLD_BURST = 2 UMETA(DisplayName = "Hold To Burst"), // Sinlge + holding to fire a powerful shot
+	WS_LIGHT = 0 UMETA(DisplayName = "Light"), // Size <= 10
+	WS_MEDIUM = 1 UMETA(DisplayName = "Medium"), // Size <= 20
+	WS_HEAVY = 2 UMETA(DisplayName = "Heavy") // Size > 20
 };
 
 USTRUCT(BlueprintType)
 struct FWeaponStats
 {
 	GENERATED_USTRUCT_BODY()
-	// TODO : Some properties can be repositioned
 	// List of all weapon stats, including the ones that are not used in some weapons
 
 	// ~~~ General
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon stats")
-	EShootingType ShootingType;
-	
 	/** Weapon damage modifier */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon stats")
 	float Damage;
 
 	/** Weapon damage type */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon stats")
-	EDamageType DamageType;
+	TEnumAsByte<EDamageType> DamageType;
 
 	/** Max range after kinetic projectile starts falling, energetic weapons start losing their damage */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon stats")
@@ -91,7 +82,18 @@ struct FWeaponStats
 	int PiercingAmount;
 
 	/** Damage reduction for every pierced enemy (only if piercing > 0) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon stats")
 	float PiercingMultiplier;
+
+	/** For different fire modes */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon stats")
+	UInputMappingContext* FireMappingContext;
+
+	/** For different fire modes */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon stats")
+	UInputAction* FireInputAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon stats")
 	
 	// ~~~ Projectile only
 	/** What type of projectile to spawn */
@@ -105,14 +107,17 @@ struct FWeaponStats
 	/** Initial speed of a projectile */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile weapon stats")
 	float ProjectileSpeed;
-	
+
 	// ~~~ Visuals
+	/** Spawned at weapon muzzle when firing */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visuals")
 	UNiagaraSystem* MuzzleFlashEffect;
 
+	/** Spawned when firing or delegated to a projectile */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visuals")
 	UNiagaraSystem* ProjectileEffect;
 
+	/** Spawned when enemy or surface is hit or delegated to a projectile */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visuals")
 	UNiagaraSystem* HitEffect;
 };

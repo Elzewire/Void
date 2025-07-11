@@ -16,10 +16,14 @@ class VOID_API UWeaponShootingStrategy : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual void Shoot(AWeapon* Weapon, const FVector& MuzzleLocation, const FRotator& ShootDirection);
 
-	// ~~~ Visual
-	virtual void UpdateShootingEffects(float DeltaTime, AWeapon* Weapon, const FVector& MuzzleLocation, const FRotator& ShootDirection);
-	virtual void SpawnShootingEffects(AWeapon* Weapon);
-	virtual void DestroyShootingEffects();
+	UFUNCTION(BlueprintCallable, Category = "Shooting strategy")
+	void InitWithWeapon(AWeapon* InitWeapon);
+	
+	virtual void OnFireStart(const FRotator& ShootDirection);
+	virtual void OnFire(const FRotator& ShootDirection);
+	virtual void OnFireStop(const FRotator& ShootDirection);
+protected:
+	UPROPERTY(BlueprintReadOnly)
+	AWeapon* Weapon;
 };

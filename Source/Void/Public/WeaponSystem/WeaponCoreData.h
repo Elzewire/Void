@@ -7,6 +7,7 @@
 #include "WeaponStats.h"
 #include "WeaponCoreData.generated.h"
 
+class UFireMode;
 class UWeaponShootingStrategy;
 class AAmmunition;
 /**
@@ -21,6 +22,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Core")
 	USkeletalMesh* CoreMesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Core")
+	FWeaponStats DefaultStats;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Core")
 	TSubclassOf<AAmmunition> Ammunition;
 

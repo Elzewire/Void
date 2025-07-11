@@ -3,8 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "EnhancedInputComponent.h"
 #include "Weapon.h"
 #include "WeaponComponent.generated.h"
+
+struct FEnhancedInputActionEventBinding;
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class VOID_API UWeaponComponent : public UActorComponent
@@ -35,7 +38,6 @@ public:
 	/** Socket on player mesh to attach to */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	FName WeaponSocket;
-	
 	/** Sets default values for this component's properties */
 	UWeaponComponent();
 	
@@ -43,38 +45,30 @@ public:
 	void AttachWeapon(AWeapon* Weapon);
 
 	UFUNCTION(BlueprintCallable, Category="Weapon")
+	void Fire(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable, Category="Weapon")
+	void FireStarted(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable, Category="Weapon")
+	void FireCompleted(const FInputActionValue& Value);
+	
+	UFUNCTION(BlueprintCallable, Category="Weapon")
 	AWeapon* GetWeapon();
-	
-	/** Start shooting (hold) */
-	UFUNCTION(BlueprintCallable, Category="Weapon")
-	void ShootStart();
-	
-	/** Stop shooting */
-	UFUNCTION(BlueprintCallable, Category="Weapon")
-	void ShootEnd();
 	
 	UFUNCTION(BlueprintCallable, Category="Weapon Component")
 	void InitWithPlayer(AVoidCharacter* OwningPlayer);
+
+	UFUNCTION(BlueprintCallable, Category="Weapon Component")
+	const FRotator& GetShootingDirection();
 
 protected:
 	// TODO : Change to array or map of weapons, to hold multiple
 	UPROPERTY(BlueprintReadOnly, Category = "Weapon")
 	AWeapon* Weapon;
-
-	UPROPERTY()
-	FTimerHandle ShootingTimer;
-	
-	UPROPERTY()
-	float LastTime;
-
-	/** Fire a single shot */
-	UFUNCTION(BlueprintCallable, Category="Weapon")
-	void Shoot();
-
-	/** Update our weapon with player's current aim direction */
-	UFUNCTION(BlueprintCallable, Category="Weapon")
-	void UpdateAimDirection();
 	
 	UPROPERTY(BlueprintReadOnly)
 	AVoidCharacter* Player;
+
+	TArray<FEnhancedInputActionEventBinding> Bindings;
 };

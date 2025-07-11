@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "VoidProjectileBase.h"
 #include "WeaponSystem/WeaponShootingStrategy.h"
 #include "ProjectileShootingStrategy.generated.h"
 
@@ -17,5 +16,5 @@ class VOID_API UProjectileShootingStrategy : public UWeaponShootingStrategy
 	
 public:
 	UFUNCTION(BlueprintCallable, Category = "Projectile Shooting")
-	virtual void Shoot(AWeapon* Weapon, const FVector& MuzzleLocation, const FRotator& ShootDirection) override;
+	virtual void OnFire(const FRotator& ShootDirection) override;
 };

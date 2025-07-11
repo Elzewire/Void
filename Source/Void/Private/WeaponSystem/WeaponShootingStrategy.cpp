@@ -3,15 +3,32 @@
 
 #include "WeaponSystem\WeaponShootingStrategy.h"
 
-void UWeaponShootingStrategy::Shoot(AWeapon* Weapon, const FVector& MuzzleLocation, const FRotator& ShootDirection)
+void UWeaponShootingStrategy::InitWithWeapon(AWeapon* InitWeapon)
+{
+	Weapon = InitWeapon;
+}
+
+void UWeaponShootingStrategy::Shoot(const FRotator& ShootDirection)
 {
 }
 
-void UWeaponShootingStrategy::UpdateShootingEffects(float DeltaTime, AWeapon* Weapon, const FVector& MuzzleLocation, const FRotator& ShootDirection)
+void UWeaponShootingStrategy::OnFireStart(const FRotator& ShootDirection)
 {
 }
 
-void UWeaponShootingStrategy::SpawnShootingEffects(AWeapon* Weapon)
+void UWeaponShootingStrategy::OnFire(const FRotator& ShootDirection)
+{
+}
+
+void UWeaponShootingStrategy::OnFireStop(const FRotator& ShootDirection)
+{
+}
+
+void UWeaponShootingStrategy::UpdateShootingEffects(const FRotator& ShootDirection)
+{
+}
+
+void UWeaponShootingStrategy::SpawnShootingEffects()
 {
 }
 

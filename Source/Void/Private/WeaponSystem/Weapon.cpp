@@ -3,6 +3,7 @@
 
 #include "WeaponSystem/Weapon.h"
 
+#include "..\..\Public\WeaponSystem\FireMode.h"
 #include "WeaponSystem/WeaponCoreData.h"
 #include "WeaponSystem/WeaponModuleData.h"
 
@@ -17,6 +18,7 @@ AWeapon::AWeapon()
 	PickUpComponent = CreateDefaultSubobject<UTP_PickUpComponent>("PickupComponent");
 	PickUpComponent->SetupAttachment(RootComponent);
 	PickUpComponent->OnPickUp.AddUniqueDynamic(this, &AWeapon::AttachToPlayer);
+	MuzzleComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Muzzle"));
 }
 
 // Called when the game starts or when spawned
@@ -67,13 +69,41 @@ void AWeapon::ConstructWeapon()
 		UE_LOG(LogBlueprint, Warning, TEXT("Shooting strategy not specified for this core"))
 		return;
 	}
-
+	
 	// TODO : Consider destroying previous object
 	ShootingStrategy = NewObject<UWeaponShootingStrategy>(this, WeaponCoreData->ShootingStrategyClass);
+	ShootingStrategy->InitWithWeapon(this);
+
+	// Create fire mode
+	if (!WeaponCoreData->FireMode)
+	{
+		UE_LOG(LogBlueprint, Warning, TEXT("Fire mode not specified for this core"))
+		return;
+	}
+	
+	// TODO : Consider destroying previous object
+	FireMode = NewObject<UFireMode>(this, WeaponCoreData->FireMode);
+	FireMode->InitWithShootingStrategy(ShootingStrategy);
+
+	// Update stats
 	WeaponStats = WeaponCoreData->BaseStats;
 	
 	// Reassemble modules
 	AttachModulesRecursive(WeaponCoreData, EquippedModuleAttachments, WeaponCoreMesh);
+
+	// Reattach muzzle component
+	USceneComponent* AttachTarget = nullptr;
+	
+	if (WeaponCoreMesh && WeaponCoreMesh->DoesSocketExist(MuzzleSocketName)) AttachTarget = WeaponCoreMesh;
+	for (int i = 0; i < ModuleMeshes.Num(); i++)
+	{
+		if (ModuleMeshes[i] && ModuleMeshes[i]->DoesSocketExist(MuzzleSocketName))
+		{
+			AttachTarget =  ModuleMeshes[i];
+		}
+	}
+	
+	if (AttachTarget) MuzzleComponent->AttachToComponent(AttachTarget,	FAttachmentTransformRules::SnapToTargetNotIncludingScale, MuzzleSocketName);
 }
 
 FTransform AWeapon::GetMuzzleTransform()
@@ -89,6 +119,11 @@ FTransform AWeapon::GetMuzzleTransform()
 	}
 	
 	return MuzzleTransform;
+}
+
+USceneComponent* AWeapon::GetMuzzleComponent()
+{
+	return MuzzleComponent;
 }
 
 void AWeapon::AttachModulesRecursive(UWeaponPartData* ParentPartData, const TArray<UWeaponModuleAttachment*>& Attachments, USceneComponent* AttachToComponent)
@@ -142,18 +177,24 @@ void AWeapon::AttachModulesRecursive(UWeaponPartData* ParentPartData, const TArr
 void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	// Update FX
-	if (bIsShooting)
-	{
-		ShootingStrategy->UpdateShootingEffects(DeltaTime,this, GetMuzzleTransform().GetLocation(), AimDirection);
-	}
 }
 
-void AWeapon::Shoot(FRotator& ShootDirection)
+void AWeapon::Fire(const FRotator& ShootDirection)
 {
 	if (!ShootingStrategy) return;
-	ShootingStrategy->Shoot(this, GetMuzzleTransform().GetLocation(), ShootDirection);
+	ShootingStrategy->OnFire(ShootDirection);
+}
+
+void AWeapon::FireStarted(const FRotator& ShootDirection)
+{
+	if (!ShootingStrategy) return;
+	ShootingStrategy->OnFireStart(ShootDirection);
+}
+
+void AWeapon::FireCompleted(const FRotator& ShootDirection)
+{
+	if (!ShootingStrategy) return;
+	ShootingStrategy->OnFireStop(ShootDirection);
 }
 
 void AWeapon::Reload()
@@ -161,36 +202,16 @@ void AWeapon::Reload()
 	
 }
 
-void AWeapon::StartShootingEffects()
+UInputAction* AWeapon::GetFireAction()
 {
-	bIsShooting = true;
-	ShootingStrategy->SpawnShootingEffects(this);
+	if (!FireMode) return nullptr;
+	return FireMode->FireAction;
 }
 
-void AWeapon::EndShootingEffects()
+UInputMappingContext* AWeapon::GetFireMappingContext()
 {
-	bIsShooting = false;
-	ShootingStrategy->DestroyShootingEffects();
-}
-
-void AWeapon::UpdateAimDirection(const FRotator& NewAimDirection)
-{
-	AimDirection = NewAimDirection;
-}
-
-UMeshComponent* AWeapon::GetActiveMuzzleComponent()
-{
-	UMeshComponent* Component = nullptr;
-	if (WeaponCoreMesh && WeaponCoreMesh->DoesSocketExist(MuzzleSocketName)) Component = WeaponCoreMesh;
-	for (int i = 0; i < ModuleMeshes.Num(); i++)
-	{
-		if (ModuleMeshes[i] && ModuleMeshes[i]->DoesSocketExist(MuzzleSocketName))
-		{
-			Component = ModuleMeshes[i];
-		}
-	}
-	
-	return Component;
+	if (!FireMode) return nullptr;
+	return FireMode->FireMappingContext;
 }
 
 void AWeapon::AttachToPlayer(AVoidCharacter* Player)

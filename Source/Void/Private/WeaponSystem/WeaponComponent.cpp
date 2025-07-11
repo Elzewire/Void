@@ -26,20 +26,36 @@ void UWeaponComponent::AttachWeapon(AWeapon* NewWeapon)
 	Player->SetHasRifle(true);
 	
 	// Set up action bindings
+	if (!FireAction || !FireMappingContext) return;
 	if (APlayerController* PlayerController = Cast<APlayerController>(Player->GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
-			// Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
-			Subsystem->AddMappingContext(FireMappingContext, 1);
+			// Remove old
+			if (FireMappingContext) Subsystem->RemoveMappingContext(FireMappingContext);
+
+			// Add new
+			FireMappingContext = Weapon->GetFireMappingContext();
+			if (FireMappingContext) Subsystem->AddMappingContext(FireMappingContext, 1);
 		}
 
 		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
 		{
+			// Get action mappings from weapon
+			if (FireAction)
+			{
+				for (FEnhancedInputActionEventBinding& Binding : Bindings)
+				{
+					EnhancedInputComponent->RemoveBinding(Binding);
+				}
+			}
+			FireAction = Weapon->GetFireAction();
+			if (!FireAction) return;
+			
 			// Fire
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &UWeaponComponent::ShootStart);
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Ongoing, this, &UWeaponComponent::UpdateAimDirection);
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &UWeaponComponent::ShootEnd);
+			Bindings.Add(EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UWeaponComponent::Fire));
+			Bindings.Add(EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &UWeaponComponent::FireStarted));
+			Bindings.Add(EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &UWeaponComponent::FireCompleted));
 		}
 	}
 }
@@ -49,44 +65,29 @@ AWeapon* UWeaponComponent::GetWeapon()
 	return Weapon;
 }
 
-void UWeaponComponent::ShootStart()
+void UWeaponComponent::Fire(const FInputActionValue& Value)
 {
-	if (Weapon)
-	{
-		Weapon->StartShootingEffects();
-
-		// Time since last shot
-		const float Delay = FMath::Clamp(Weapon->WeaponStats.ShootingSpeed - (GetWorld()->GetTimeSeconds() - LastTime), 0.0f, Weapon->WeaponStats.ShootingSpeed);
-
-		GetWorld()->GetTimerManager().SetTimer(ShootingTimer, this, &UWeaponComponent::Shoot, Weapon->WeaponStats.ShootingSpeed, true, Delay);
-	}
+	Weapon->Fire(GetShootingDirection());
 }
 
-void UWeaponComponent::Shoot()
+void UWeaponComponent::FireStarted(const FInputActionValue& Value)
 {
-	if (!Player) return;
-	FRotator ShootDirection = Player->GetFirstPersonCameraComponent()->GetComponentRotation();
-	
-	if (Weapon) Weapon->Shoot(ShootDirection);
-	LastTime = GetWorld()->GetTimeSeconds();
+	Weapon->FireStarted(GetShootingDirection());
 }
 
-void UWeaponComponent::ShootEnd()
+void UWeaponComponent::FireCompleted(const FInputActionValue& Value)
 {
-	if (Weapon) Weapon->EndShootingEffects();
-	GetWorld()->GetTimerManager().ClearTimer(ShootingTimer);
-}
-
-void UWeaponComponent::UpdateAimDirection()
-{
-	UE_LOG(LogTemp, Warning, TEXT("ONGOING"))
-	if (!Player) return;
-	const FRotator ShootDirection = Player->GetFirstPersonCameraComponent()->GetComponentRotation();
-	
-	if (Weapon) Weapon->UpdateAimDirection(ShootDirection);
+	Weapon->FireCompleted(GetShootingDirection());
 }
 
 void UWeaponComponent::InitWithPlayer(AVoidCharacter* OwningPlayer)
 {
 	this->Player = OwningPlayer;
+}
+
+const FRotator& UWeaponComponent::GetShootingDirection()
+{
+	FRotator ShootDirection = FRotator::ZeroRotator;
+	if (Player) ShootDirection = Player->GetFirstPersonCameraComponent()->GetComponentRotation();
+	return ShootDirection;
 }

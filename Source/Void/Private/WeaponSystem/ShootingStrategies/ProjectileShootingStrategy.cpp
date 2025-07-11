@@ -2,9 +2,10 @@
 
 
 #include "WeaponSystem/ShootingStrategies/ProjectileShootingStrategy.h"
+#include "VoidProjectileBase.h"
 #include "WeaponSystem/Weapon.h"
 
-void UProjectileShootingStrategy::Shoot(AWeapon* Weapon, const FVector& MuzzleLocation, const FRotator& ShootDirection)
+void UProjectileShootingStrategy::OnFire(const FRotator& ShootDirection)
 {
 	if (!Weapon) return;
 	
@@ -18,6 +19,8 @@ void UProjectileShootingStrategy::Shoot(AWeapon* Weapon, const FVector& MuzzleLo
 	SpawnParameters.Owner = Weapon;
 	SpawnParameters.Instigator = Weapon->GetInstigator();
 	
-	AVoidProjectileBase* Projectile = GetWorld()->SpawnActor<AVoidProjectileBase>(Weapon->WeaponStats.ProjectileClass, MuzzleLocation, ShootDirection, SpawnParameters);
+	AVoidProjectileBase* Projectile = GetWorld()->SpawnActor<AVoidProjectileBase>(Weapon->WeaponStats.ProjectileClass,
+		Weapon->GetMuzzleTransform().GetLocation(), ShootDirection, SpawnParameters);
+	
 	// TODO: Here we can add some projectile modifications from weapon
 }
